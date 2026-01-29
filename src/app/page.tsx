@@ -1,51 +1,52 @@
 "use client";
+import React, { useRef, useState } from "react";
 
-import { useRef } from "react";
+const SCREEN_HEIGHT = 400;
+const TOTAL_BOXES = 50000;
+const BOX_HEIGHT = 40;
 
-const row_height = 40;
-const container_height = 400;
-const total_rows = 50000;
-
-export default function Home() {
-  // typescript saftey check
-  // scrollRef could be a element or null
-  // pointing to element
+export default function page() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  //  saving scroll number
   const scrollTopRef = useRef(0);
 
-  // typescript saftey check
-  // scrollRef is not null here
-  const handleScroll = () => {
-    if (scrollRef.current === null) {
-      return;
+  // useState currentRow so it value can change on render
+  const [currentRow, setCurrentRow] = useState(0);
+
+  const scrollHandler = () => {
+    if (!scrollRef.current) {
+      return console.log("scrollRef.current === null");
     }
-    // scrollTop telling as at what number we scrolled
     scrollTopRef.current = scrollRef.current.scrollTop;
-    console.log(scrollTopRef.current);
+
+    //  currentRow = current pixel(can be number between 50000*40) * box height
+    setCurrentRow(Math.floor(scrollTopRef.current / BOX_HEIGHT));
   };
 
   return (
     <div
-      // You don’t need ref to listen to onScroll,
-      // and you don’t need ref to get scrollTop if
-      //  you use the event — but you do need ref if
-      //  you want persistent access to the scrollable
-      // element
-
-      // scrollRef is in element now
       ref={scrollRef}
-      // event listener tell us when we scoll
-      onScroll={handleScroll}
-      className=" w-full overflow-auto bg-red-500"
-      style={{ height: container_height }}
+      onScroll={scrollHandler}
+      style={{ height: SCREEN_HEIGHT }}
+      className="w-full bg-blue-400 overflow-auto"
     >
-      {/* FAKE SCROLL */}
       <div
-        className="w-full bg-blue-400"
-        style={{ height: row_height * total_rows }}
-      ></div>
+        style={{ height: TOTAL_BOXES * BOX_HEIGHT }}
+        className="w-full bg-green-400 relative"
+      >
+        {/* Single Box */}
+        <div
+          style={{
+            height: BOX_HEIGHT,
+            position: "absolute",
+
+            // top = currentRow(out of 50000) * 40
+            top: currentRow * BOX_HEIGHT,
+          }}
+          className="w-full bg-red-400 flex items-center p-4"
+        >
+          Row {currentRow}
+        </div>
+      </div>
     </div>
   );
 }
